@@ -1,0 +1,146 @@
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script src="https://www.google.com/recaptcha/api.js?render=@ViewBag.RecaptchaSiteKey"></script>
+    <script>
+        function executeRecaptcha() {
+            return new Promise((resolve, reject) => {
+                try {
+                    grecaptcha.ready(function() {
+                        grecaptcha.execute('@ViewBag.RecaptchaSiteKey', { action: 'register' })
+                            .then(function(token) {
+                                if (!token) {
+                                    console.error('reCAPTCHA token is empty');
+                                    reject(new Error('Empty reCAPTCHA token'));
+                                    return;
+                                }
+                                document.getElementById("recaptchaToken").value = token;
+                                console.log('reCAPTCHA token generated successfully');
+                                resolve(token);
+                            })
+                            .catch(function(error) {
+                                console.error('reCAPTCHA execution error:', error);
+                                reject(error);
+                            });
+                    });
+                } catch (error) {
+                    console.error('reCAPTCHA initialization error:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Execute reCAPTCHA when page loads
+        window.onload = function() {
+            executeRecaptcha().catch(function(error) {
+                console.error('Initial reCAPTCHA error:', error);
+            });
+        };
+
+        // Handle form submission
+        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            try {
+                const token = await executeRecaptcha();
+                if (!token) {
+                    throw new Error('Failed to get reCAPTCHA token');
+                }
+                this.submit();
+            } catch (error) {
+                console.error('Form submission error:', error);
+                alert('Error verifying reCAPTCHA. Please try again.');
+            }
+        });
+    </script>
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data">
+            <input type="hidden" id="recaptchaToken" name="token" />
+            <h4>Create a new account.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            
+            <div class="form-group">
+                <label asp-for="FullName"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="CreditCard"></label>
+                <input asp-for="CreditCard" class="form-control" />
+                <span asp-validation-for="CreditCard" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Gender"></label>
+                <select asp-for="Gender" class="form-control">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="PhoneNumber"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="DeliveryAddress"></label>
+                <input asp-for="DeliveryAddress" class="form-control" />
+                <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="PostalCode"></label>
+                <input asp-for="PostalCode" class="form-control" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Photo"></label>
+                <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="Photo" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="AboutMe"></label>
+                <textarea asp-for="AboutMe" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="AboutMe" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+</div> 

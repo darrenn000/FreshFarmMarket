@@ -1,0 +1,93 @@
+@model ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        @if (!string.IsNullOrEmpty(Model.Photo))
+                        {
+                            <img src="~/uploads/@Model.Photo" alt="Profile Photo" class="img-fluid rounded-circle mb-3" />
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <h4>@Model.FullName</h4>
+                        <p class="text-muted">@Model.Email</p>
+                    </div>
+                </div>
+
+                <hr />
+
+                <dl class="row">
+                    <dt class="col-sm-3">Phone Number</dt>
+                    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+                    <dt class="col-sm-3">Delivery Address</dt>
+                    <dd class="col-sm-9">@Model.DeliveryAddress</dd>
+
+                    <dt class="col-sm-3">Postal Code</dt>
+                    <dd class="col-sm-9">@Model.PostalCode</dd>
+
+                    <dt class="col-sm-3">About Me</dt>
+                    <dd class="col-sm-9">@Model.AboutMe</dd>
+                </dl>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Two-Factor Authentication</h5>
+                        @if (Model.TwoFactorEnabled)
+                        {
+                            <div class="alert alert-success">
+                                2FA is enabled. Your account is more secure!
+                            </div>
+                            <form asp-action="Disable2FA" method="post">
+                                <button type="submit" class="btn btn-danger">Disable 2FA</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                2FA is not enabled. Enable it to add an extra layer of security!
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.QRCodeUrl))
+                            {
+                                <div class="text-center mb-3">
+                                    <img src="@Model.QRCodeUrl" alt="2FA QR Code" style="width: 200px; height: 200px;" />
+                                </div>
+                                <div class="alert alert-info">
+                                    <p>1. Install Google Authenticator on your phone</p>
+                                    <p>2. Scan the QR code or enter this key manually:</p>
+                                    <code class="d-block bg-light p-2 mb-3">@Model.SecretKey</code>
+                                    <p>3. Enter the 6-digit code from Google Authenticator below:</p>
+                                </div>
+                                <form asp-action="Enable2FA" method="post">
+                                    <div class="form-group">
+                                        <label for="verificationCode">Verification Code</label>
+                                        <input type="text" class="form-control" id="verificationCode" name="verificationCode" required pattern="[0-9]{6}" maxlength="6" style="width: 200px;" />
+                                        <small class="form-text text-muted">Enter the 6-digit code from your authenticator app</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-3">Enable 2FA</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Generate2FA" method="post">
+                                    <button type="submit" class="btn btn-primary">Setup 2FA</button>
+                                </form>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
